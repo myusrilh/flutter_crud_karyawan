@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:crud_karyawan/helper/custom_theme.dart';
+import 'package:crud_karyawan/helper/custom_data.dart';
 import 'package:crud_karyawan/screen/home_page.dart';
 import 'package:crud_karyawan/services/karyawan_repository.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +25,8 @@ class _SignInPageState extends State<SignInPage> {
   // String urlBase = "http://localhost:3000/api/"; // default
   // String urlBase =
   //     "http://10.0.2.2:3000/api/"; // url server untuk AVD (bisa menggunakan 127.0.0.1:port juga)
-  String urlBase =
-      "http://192.168.100.56:3000/api/"; // url server untuk HP fisik (bisa menggunakan 127.0.0.1:port juga)
+  // String urlBase =
+  //     "http://192.168.100.56:3000/api/"; // url server untuk HP fisik (bisa menggunakan 127.0.0.1:port juga)
 
   void saveSession(String username, String role) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -40,7 +40,7 @@ class _SignInPageState extends State<SignInPage> {
     String apiEndPoint = "user/login";
 
     try {
-      final response = await http.post(Uri.parse(urlBase + apiEndPoint),
+      final response = await http.post(Uri.parse(urlBase + "/" + apiEndPoint),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({"username": username, "password": password}));
 

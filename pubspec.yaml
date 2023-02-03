@@ -44,6 +44,7 @@ dependencies:
   excel: ^2.0.1
   path_provider: ^2.0.12
   path: ^1.8.2
+  # permission_handler: ^10.2.0
   # syncfusion_flutter_datagrid: ^20.4.48
   # syncfusion_flutter_datagrid_export: ^20.4.48-beta
 

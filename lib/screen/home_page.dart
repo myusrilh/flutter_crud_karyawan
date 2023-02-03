@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:crud_karyawan/helper/custom_theme.dart';
+import 'package:crud_karyawan/helper/custom_data.dart';
 import 'package:crud_karyawan/models/karyawan_model.dart';
 import 'package:crud_karyawan/models/member_model.dart';
 import 'package:crud_karyawan/screen/appbar/default_app_bar.dart';
+import 'package:crud_karyawan/screen/edit_karyawan_page.dart';
 import 'package:crud_karyawan/screen/new_karyawan_page.dart';
 import 'package:crud_karyawan/services/karyawan_repository.dart';
 
@@ -56,9 +57,9 @@ class _HomePageState extends State<HomePage> {
     allKaryawan = [];
     futureKaryawanData = getKaryawan(null);
     futureManagerData = getManager();
-    setState(() {
-      getUsernameAndRoleFromSession();
-    });
+    getUsernameAndRoleFromSession();
+    // setState(() {
+    // });
   }
 
   @override
@@ -207,16 +208,6 @@ class _HomePageState extends State<HomePage> {
           .value = allKaryawan[i].memberName;
     }
 
-    for (var table in excel.tables.keys) {
-      print(table);
-      print(excel.tables[table]!.maxCols);
-      print(excel.tables[table]!.maxRows);
-      print("${excel.tables[table]!.rows}");
-      for (var row in excel.tables[table]!.rows) {
-        print("${row}");
-      }
-    }
-
     saveToExcel(excel).whenComplete(() => ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(
             duration: Duration(seconds: 1),
@@ -235,7 +226,6 @@ class _HomePageState extends State<HomePage> {
 
     return File(
         '$path/data_karyawan_v-${version}.xlsx'); //jika sudah terinstall dalam bentuk APK?
-    // return File('/storage/0/emulated/Download/data_karyawan_v-${version}.xlsx');
   }
 
   Future<File> saveToExcel(Excel excel) async {
@@ -356,9 +346,15 @@ class _HomePageState extends State<HomePage> {
           width: 120,
           height: 30,
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
+            onPressed: () async {
+              final result = await Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => TambahKaryawanPage()));
+
+              if (result != null) {
+                setState(() {
+                  futureKaryawanData = getKaryawan(null);
+                });
+              }
             },
             style: ButtonStyle(
                 backgroundColor:
@@ -463,7 +459,19 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                         children: [
                           ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final result = await Navigator.of(context)
+                                    .push(MaterialPageRoute(
+                                        builder: (context) => EditKaryawanPage(
+                                              passedMemberID:
+                                                  karyawan.value.memberID!,
+                                            )));
+                                if (result != null) {
+                                  setState(() {
+                                    futureKaryawanData = getKaryawan(null);
+                                  });
+                                }
+                              },
                               child: Text(
                                 "Ubah",
                                 style: TextStyle(color: Colors.black),
@@ -481,6 +489,7 @@ class _HomePageState extends State<HomePage> {
                                   message = KaryawanRepository()
                                       .deleteMember(karyawan.value.memberID!);
                                   allKaryawanList.removeAt(karyawan.key);
+                                  futureKaryawanData = getKaryawan(null);
                                 });
                               },
                               child: Text("Hapus",
@@ -497,6 +506,11 @@ class _HomePageState extends State<HomePage> {
     } else {
       return DataTable(
           columns: [
+            DataColumn(
+                label: Text(
+              "No",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            )),
             DataColumn(
                 label: Text(
               "rm_mst_gepd",
@@ -522,6 +536,9 @@ class _HomePageState extends State<HomePage> {
               .asMap()
               .entries
               .map((karyawan) => DataRow(cells: [
+                    DataCell(Container(
+                      child: Text((karyawan.key + 1).toString()),
+                    )),
                     DataCell(Container(
                       child: Text(karyawan.value.gepdID.toString()),
                     )),

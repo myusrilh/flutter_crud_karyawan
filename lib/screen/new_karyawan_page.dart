@@ -1,8 +1,11 @@
-import 'package:crud_karyawan/helper/custom_theme.dart';
+import 'dart:convert';
+
+import 'package:crud_karyawan/helper/custom_data.dart';
 import 'package:crud_karyawan/models/member_model.dart';
 import 'package:crud_karyawan/screen/appbar/default_app_bar.dart';
 import 'package:crud_karyawan/services/karyawan_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class TambahKaryawanPage extends StatefulWidget {
   const TambahKaryawanPage({super.key});
@@ -14,11 +17,28 @@ class TambahKaryawanPage extends StatefulWidget {
 class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? dropDownValue;
+  bool exist = false;
+
+  var txtEditBranchID = TextEditingController();
+  var txtEditMemberID = TextEditingController();
+  var txtEditMemberName = TextEditingController();
+  var txtEditCurrentPosition = TextEditingController(text: "EPC");
+  var txtEditManagerID = TextEditingController();
 
   KaryawanRepository karyawanRepository = KaryawanRepository();
+
   late Future<List<MemberModel>> futureManagerData;
   Future<List<MemberModel>> getManager() async {
     return await karyawanRepository.fetchDataAllManager();
+  }
+
+  late Future<List<MemberModel>> futureKaryawanByID;
+
+  Future getKaryawanByID() async {
+    List<MemberModel> list = await karyawanRepository
+        .fetchDataKaryawanByMemberID(txtEditMemberID.text);
+
+    return list.first.rmBranchID;
   }
 
   @override
@@ -28,17 +48,50 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
     super.initState();
   }
 
-  void _validateInput() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  inputDataProcess() async {
+    String branchID = txtEditBranchID.text;
+    String repID = txtEditMemberID.text;
+    String memberName = txtEditMemberName.text;
+    String currentPosition = txtEditCurrentPosition.text;
+    String managerID = txtEditManagerID.text;
+
+    String isExist = await getKaryawanByID();
+    if (isExist.contains("Tidak ada data")) {
+      String endPointNewKaryawan = "${urlBase}/karyawan/insertKaryawan";
+      final response = await http.post(Uri.parse(endPointNewKaryawan),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode({
+            "rmBranchID": branchID.toUpperCase(),
+            "rmRepID": repID.toUpperCase(),
+            "rmName": memberName.toUpperCase(),
+            "rmCurrentPosition": currentPosition.toUpperCase(),
+            "rmManagerID": managerID.toUpperCase()
+          }));
+      if (response.statusCode == 200) {
+        final String result = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("${result}")));
+        Navigator.of(context).pop(true);
+      } else {
+        throw Exception(response.reasonPhrase);
+      }
+    } else {
+      setState(() {
+        exist = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "Data dengan Member ID:${repID} sudah ada di database.\nGanti ID lain!")));
     }
   }
 
-  var txtEditBranchID = TextEditingController();
-  var txtEditMemberID = TextEditingController();
-  var txtEditMemberName = TextEditingController();
-  var txtEditCurrentPosition = TextEditingController(text: "EPC");
-  var txtEditManagerID = TextEditingController();
+  void _validateInput() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      inputDataProcess();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +155,7 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                         controller: txtEditMemberID,
                         style: TextStyle(fontSize: 12),
                         onSaved: (String? val) {
-                          txtEditBranchID.text = val!;
+                          txtEditMemberID.text = val!;
                         },
                         validator: (value) => value!.isEmpty
                             ? 'Member ID tidak boleh kosong!'
@@ -125,15 +178,21 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                             enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide(
-                                    color: emeraldColorTheme, width: 1)),
+                                    color:
+                                        exist ? Colors.red : emeraldColorTheme,
+                                    width: 1)),
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide(
-                                    color: emeraldColorTheme, width: 1)),
+                                    color:
+                                        exist ? Colors.red : emeraldColorTheme,
+                                    width: 1)),
                             focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide(
-                                    color: emeraldColorTheme, width: 1))),
+                                    color:
+                                        exist ? Colors.red : emeraldColorTheme,
+                                    width: 1))),
                       ),
                     ),
                     Padding(
@@ -142,7 +201,7 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                         controller: txtEditMemberName,
                         style: TextStyle(fontSize: 12),
                         onSaved: (String? val) {
-                          txtEditBranchID.text = val!;
+                          txtEditMemberName.text = val!;
                         },
                         validator: (value) => value!.isEmpty
                             ? 'Nama member tidak boleh kosong!'
@@ -267,6 +326,7 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                             onChanged: (value) {
                               setState(() {
                                 dropDownValue = value;
+                                txtEditManagerID.text = value!;
                               });
                             },
                           );
@@ -279,11 +339,7 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                       child: Row(children: [
                         ElevatedButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                duration: Duration(seconds: 1),
-                                content: Text("Submit Button")));
                             _validateInput();
-                            setState(() {});
                           },
                           style: ButtonStyle(
                               backgroundColor: MaterialStatePropertyAll<Color>(
@@ -302,7 +358,7 @@ class _TambahKaryawanPageState extends State<TambahKaryawanPage> {
                         ElevatedButton(
                           onPressed: () {
                             // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            //     duration: Duration(seconds: 1),
+                            //     duration: Duration(milliseconds: 500),
                             //     content: Text("Cancel Button")));
                             Navigator.of(context).pop();
                             setState(() {});

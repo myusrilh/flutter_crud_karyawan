@@ -4,7 +4,7 @@ import 'package:crud_karyawan/screen/home_page.dart';
 import 'package:crud_karyawan/services/karyawan_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../helper/custom_theme.dart';
+import '../helper/custom_data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
