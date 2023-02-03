@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    allKaryawan = [];
     futureKaryawanData = getKaryawan(null);
     futureManagerData = getManager();
     setState(() {
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                 height: 15,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                padding: EdgeInsets.symmetric(vertical: 2),
                 child: FutureBuilder(
                     future: futureManagerData,
                     builder: (_, snapshot) {
@@ -204,17 +205,6 @@ class _HomePageState extends State<HomePage> {
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex))
           .value = allKaryawan[i].memberName;
-
-      //   sheet.appendRow([
-      //     item.key.toString(),
-      //     item.value.gepdID.toString(),
-      //     item.value.gepdName.toString(),
-      //     item.value.epdID.toString(),
-      //     item.value.epdName.toString(),
-      //     item.value.branchID.toString(),
-      //     item.value.memberName.toString()
-      //   ]);
-      // });
     }
 
     for (var table in excel.tables.keys) {
@@ -242,7 +232,10 @@ class _HomePageState extends State<HomePage> {
   Future<File> _localFile(int version) async {
     final path = await _localPath;
     print(path);
-    return File('$path/data_karyawan_v-${version}.xlsx');
+
+    return File(
+        '$path/data_karyawan_v-${version}.xlsx'); //jika sudah terinstall dalam bentuk APK?
+    // return File('/storage/0/emulated/Download/data_karyawan_v-${version}.xlsx');
   }
 
   Future<File> saveToExcel(Excel excel) async {

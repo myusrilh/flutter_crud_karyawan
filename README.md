@@ -1,16 +1,15 @@
-# crud_karyawan
+# CRUD Karyawan Flutter App
 
 A new Flutter project.
 
 ## Getting Started
 
 This project is a starting point for a Flutter application.
+This project is about human resources management in a company including:
+- Insert new karyawan (Create), **<-- Only for admin**
+- Edit karyawan data (Update), **<-- Only for admin**
+- See all karyawan data or by manager (Read)
+- Delete karyawan data (Delete) **<-- Only for admin**
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Steps
+First of all, this project is still in a localhost. So if you want to try this project, you should clone the API first. The API using Express.js, so make sure you already installed them. Link to the API Project: [Express CRUD Karyawan API](https://github.com/myusrilh/express_api_karyawan)
